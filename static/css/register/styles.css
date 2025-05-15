@@ -1,0 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+body {
+  font-family: "Inter", sans-serif;
+}
+.auth-container {
+  background-image: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+}
+.password-strength {
+  height: 4px;
+  transition: all 0.3s ease;
+}
