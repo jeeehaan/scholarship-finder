@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "apps.authentication",
+    'django_json_widget',
 ]
 
 MIDDLEWARE = [
@@ -69,10 +70,25 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'scholarshipfinderdb',
+        'USER': 'pamanhandy',
+        'PASSWORD': 'gnetnagydnah',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'OPTIONS': {
+            'connect_timeout': 3,
+            'options': '-c search_path=public'
+        }
     }
 }
 
