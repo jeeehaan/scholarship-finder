@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.authentication",
     "apps.scholarships",
     "huey.contrib.djhuey",
+    'django_json_widget',
 ]
 
 MIDDLEWARE = [
