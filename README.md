@@ -22,12 +22,14 @@ Create a Virtual Environment
 Install Dependencies
 
 ```shell
-  pip install -r requirement.txt
+  pip install -r requirements.txt
 ```
 
 Run the project
 
 ```shell
   ./manage.py runserver
+
+  npm install tailwindcss @tailwindcss/cli
   npm run tw
 ```
