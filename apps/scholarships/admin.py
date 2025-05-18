@@ -15,7 +15,8 @@ class ScholarshipAdmin(admin.ModelAdmin):
         "country",
         "type",
         "created_at",
-        "url",
+        "official_url",
+        "source_url",
         "benefits",
         "requirements",
     )
