@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field
 
-class ScholarshipOutput(BaseModel):
+
+class ScholarshipListItem(BaseModel):
+    url: str = Field(description="A link to scholarship details.")
+    title: str = Field(description="The official name of the scholarship program.")
+    
+class ScholarshipDetail(BaseModel):
     title: str = Field(description="The official name of the scholarship program.")
     url: str = Field(
         description="A link to scholarship details."
@@ -34,4 +39,4 @@ class ScholarshipOutput(BaseModel):
 
 
 class ScholarshipList(BaseModel):
-    scholarships: list[ScholarshipOutput]
+    scholarships: list[ScholarshipListItem]
