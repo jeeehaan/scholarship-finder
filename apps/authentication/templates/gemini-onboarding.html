@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div x-data="onboarding()" class="min-h-screen bg-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <!-- Left Section: Progress & Guidance -->
+      <div class="lg:w-1/3">
+        <div class="bg-white p-6 rounded-xl shadow-lg space-y-8">
+          <!-- Progress Tracker -->
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-6">Your Progress</h3>
+            <div class="space-y-6">
+              <!-- Step 1 -->
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                     :class="currentStep >= 1 ? 'border-blue-600 bg-blue-100' : 'border-gray-300 bg-gray-50'">
+                  <span x-show="currentStep >= 1" class="text-blue-600">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  </span>
+                  <span x-show="currentStep < 1" class="text-gray-500 font-medium text-sm">1</span>
+                </div>
+                <div class="ml-4">
+                  <p class="text-md font-medium" :class="currentStep >= 1 ? 'text-blue-700 font-semibold' : 'text-gray-800'">Basic Information</p>
+                  <p class="text-sm text-gray-500">Tell us about yourself</p>
+                </div>
+              </div>
+              
+              <!-- Step 2 -->
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                     :class="currentStep >= 2 ? 'border-blue-600 bg-blue-100' : 'border-gray-300 bg-gray-50'">
+                  <span x-show="currentStep >= 2" class="text-blue-600">
+                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  </span>
+                   <span x-show="currentStep < 2" class="text-gray-500 font-medium text-sm">2</span>
+                </div>
+                <div class="ml-4">
+                  <p class="text-md font-medium" :class="currentStep >= 2 ? 'text-blue-700 font-semibold' : 'text-gray-800'">Education Details</p>
+                  <p class="text-sm text-gray-500">Your academic background</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Guidance Section -->
+          <div class="border-t border-gray-200 pt-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Guidance</h3>
+            <ul class="space-y-4 text-sm text-gray-600">
+              <li class="flex items-start">
+                <svg class="flex-shrink-0 h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Complete all sections for best scholarship matches.</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="flex-shrink-0 h-5 w-5 text-blue-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>We keep your information secure and private.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Section: Onboarding Form -->
+      <div class="lg:w-2/3">
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+          <!-- Step Header -->
+          <div class="mb-10 text-center">
+            <h2 class="text-3xl font-bold text-gray-800">Complete Your Profile</h2>
+            <p class="text-gray-600 mt-3 text-md">
+              We need a few more details to personalize your experience and find the best opportunities for you.
+            </p>
+          </div>
+          
+          <form @submit.prevent="submitForm">
+            <!-- Step 1: Basic Info -->
+            <div x-show="currentStep === 1" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform translate-y-4"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform -translate-y-4"
+                 class="space-y-6">
+              <h3 class="text-xl font-semibold text-gray-700 mb-6 border-b border-gray-200 pb-3">Basic Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <div>
+                  <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input type="text" id="first_name" x-model="formData.first_name" required
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-150">
+                </div>
+                
+                <div>
+                  <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input type="text" id="last_name" x-model="formData.last_name" required
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-150">
+                </div>
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input type="email" id="email" x-model="formData.email" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-150">
+              </div>
+            </div>
+            
+            <!-- Step 2: Education Info -->
+            <div x-show="currentStep === 2"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform translate-y-4"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform -translate-y-4"
+                 class="space-y-6">
+              <h3 class="text-xl font-semibold text-gray-700 mb-6 border-b border-gray-200 pb-3">Education Details</h3>
+              <div>
+                <label for="education_level" class="block text-sm font-medium text-gray-700 mb-1">Current Education Level</label>
+                <select id="education_level" x-model="formData.education_level" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-150 bg-white">
+                  <option value="">Select your education level</option>
+                  <option value="High School">High School</option>
+                  <option value="Undergraduate">Undergraduate</option>
+                  <option value="Graduate">Graduate</option>
+                  <option value="PhD">PhD</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="institution" class="block text-sm font-medium text-gray-700 mb-1">Institution Name</label>
+                <input type="text" id="institution" x-model="formData.institution" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow duration-150">
+              </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="mt-10 flex justify-between items-center border-t border-gray-200 pt-6">
+              <button x-show="currentStep > 1" @click="currentStep--" type="button"
+                      class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1">
+                ← Back
+              </button>
+              
+              <!-- This empty div acts as a spacer if the "Back" button is hidden, ensuring "Continue" is pushed right by ml-auto. 
+                   However, ml-auto on the Continue button itself should handle this.
+                   Let's keep it minimal: if "Back" is hidden, "Continue" will be the first element.
+                   The `ml-auto` on "Continue" and "Complete" buttons will push them to the right of the flex container if they are the last logical items.
+              -->
+              <div :class="{ 'invisible': currentStep > 1 }"></div> <!-- Occupies space if Back button is shown, otherwise invisible keeping layout stable -->
+
+
+              <button x-show="currentStep < 2" @click="nextStep()" type="button"
+                      class="ml-auto px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md hover:shadow-lg">
+                Continue →
+              </button>
+              
+              <button x-show="currentStep === 2" @click="attemptSubmit()" type="button"
+                      class="ml-auto px-6 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 shadow-md hover:shadow-lg">
+                Complete Profile
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('onboarding', () => ({
+      currentStep: 1,
+      formData: {
+        first_name: '',
+        last_name: '',
+        email: '',
+        education_level: '',
+        institution: ''
+      },
+
+      nextStep() {
+        const currentStepFields = this.$el.querySelectorAll(`div[x-show="currentStep === ${this.currentStep}"] [required]`);
+        let allValid = true;
+        currentStepFields.forEach(field => {
+          if (!field.checkValidity()) {
+            field.reportValidity(); // Show browser's validation message
+            allValid = false;
+          }
+        });
+
+        if (allValid) {
+          this.currentStep++;
+        }
+      },
+      
+      attemptSubmit() {
+        const currentStepFields = this.$el.querySelectorAll(`div[x-show="currentStep === ${this.currentStep}"] [required]`);
+        let allValid = true;
+        currentStepFields.forEach(field => {
+          if (!field.checkValidity()) {
+            field.reportValidity();
+            allValid = false;
+          }
+        });
+
+        if (allValid) {
+          this.submitForm();
+        }
+      },
+      
+      submitForm() {
+        console.log('Submitting form data:', this.formData);
+        // Optional: Add a loading state indicator here
+        fetch('/api/onboarding/', { // Make sure this URL is correct
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Django CSRF token
+          },
+          body: JSON.stringify(this.formData)
+        })
+        .then(response => {
+          if (response.ok) {
+            // Optional: Show a success message before redirecting
+            alert('Profile completed successfully!'); // Replace with a nicer notification if possible
+            window.location.href = '/dashboard/'; // Make sure this URL is correct
+          } else {
+            return response.json().then(data => {
+              console.error('Submission error data:', data);
+              // Try to display specific errors if backend provides them
+              let errorMessage = 'Error submitting form. Please try again.';
+              if (data && typeof data === 'object') {
+                // Example: if errors are like { field_name: ["error message"] }
+                const fieldErrors = Object.values(data).flat().join(' ');
+                if (fieldErrors) errorMessage = fieldErrors;
+                else if (data.detail) errorMessage = data.detail;
+              }
+              alert(errorMessage);
+            }).catch(() => {
+                 // Fallback if response.json() fails or response is not JSON
+                alert(`Error submitting form (Status: ${response.status}). Please try again.`);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Network error:', error);
+          alert('Network error. Please check your connection and try again.');
+        })
+        .finally(() => {
+          // Optional: Remove loading state indicator here
+        });
+      }
+    }));
+  });
+</script>
+{% endblock %}
