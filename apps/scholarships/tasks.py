@@ -1,10 +1,11 @@
 import logging
-from huey.contrib.djhuey import task
+from huey import crontab
+from huey.contrib.djhuey import periodic_task
 
 from .methods import scrape_and_insert_scholarships
 logging.basicConfig(level=logging.INFO)
 
-@task()
+@periodic_task(crontab(hour=10, minute=0))
 def scrape_scholarships():
     import asyncio
     asyncio.run(scrape_and_insert_scholarships())
