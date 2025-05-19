@@ -179,7 +179,6 @@ def query_search(query):
     collection = client.get_collection(
         name="scholarship_finder", embedding_function=openai_ef
     )
-    print("count data in collection", collection.count())
     results = collection.query(
         query_texts=[query],
         n_results=3,
