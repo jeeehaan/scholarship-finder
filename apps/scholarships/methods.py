@@ -53,7 +53,7 @@ async def scrape_and_insert_scholarships():
         override_navigator=True,
     )
     browser_config = BrowserConfig(proxy_config=proxy_config)
-    client = await AsyncHttpClient(host="localhost", port=8001)
+    client = await AsyncHttpClient(host="localhost", port=5010)
     collection = await client.get_or_create_collection(
         name="scholarship_finder", embedding_function=openai_ef
     )
@@ -66,7 +66,7 @@ async def scrape_and_insert_scholarships():
             break
 
         try:
-            async with AsyncWebCrawler() as crawler:
+            async with AsyncWebCrawler(config=browser_config) as crawler:
                 result = await crawler.arun(
                     f"https://opportunitiescorners.com/category/scholarships-in-europe/page/{n}/",
                     config=run_config,
@@ -94,7 +94,7 @@ async def scrape_and_insert_scholarships():
                         logger.info(f"Scholarship {r.url} already exists, skipping")
                         continue
                     try:
-                        async with AsyncWebCrawler() as crawler:
+                        async with AsyncWebCrawler(config=browser_config) as crawler:
                             logger.info(f"Scraping {r.url}")
                             scrape = await crawler.arun(r.url, config=run_config)
                             
@@ -175,7 +175,7 @@ async def scrape_and_insert_scholarships():
 
 
 def query_search(query):
-    client = HttpClient(host="localhost", port=8001)
+    client = HttpClient(host="localhost", port=5010)
     collection = client.get_collection(
         name="scholarship_finder", embedding_function=openai_ef
     )
