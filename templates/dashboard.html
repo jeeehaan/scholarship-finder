@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
- <!-- Navbar -->
+<!-- Navbar -->
 <nav class="container flex justify-between mx-auto p-4">
     <div class="text-primary text-xl font-bold">ScholarshipFinder</div>
     <div class="flex gap-12">
@@ -14,7 +14,7 @@
             </div>
             <div x-show="open" @click.outside="open = false">
                 <ul>
-                    <li><a href=>Logout</a></li>
+                    <li><a href="">Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -22,7 +22,7 @@
 </nav>
 <!--   End Navbar-->
 
-<main class="container mx-auto px-16">
+<main class="container mx-auto px-16 py-8">
     <section class="py-8">
         <p class="text-3xl font-bold text-gray-800">Welcome back, Jessy!</p>
         <p class="text-gray-600">Here are scholarship that match your preference</p>
@@ -32,25 +32,8 @@
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
         <div class="grid grid-cols-3 gap-16">
             {% if scholarships %}
-                {% for scholarship in scholarships %}
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4">
-                        <div class="badge badge-soft badge-accent">{{ scholarship.type }}</div>
-                        <p class="text-lg font-semibold text-gray-900 my-4">{{ scholarship.title }}</p>
-                        <div class="space-y-2">
-                            <div>
-                                <i class="fas fa-graduation-cap mr-2 text-gray-400 w-4"></i>
-                                <span>{{ scholarship.degree }}</span>
-                            </div>
-                             <div class="flex items-center">
-                                 <i class="fas fa-map-marker-alt mr-2 text-gray-400 w-4"></i>
-                                <span>{{ scholarship.country }}</span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mt-4">
-                            <p class="text-error font-medium text-sm">Due: {{ scholarship.deadline }}</p>
-                            <button class="btn btn-primary">View Details</button>
-                        </div>
-                    </div>
+                {% for scholarship in scholarships %}    
+                {% include 'components/scholarship-card.html' with scholarship=scholarship %} 
                 {% endfor %}
             {% else %}
                 <p>No scholarships found.</p>

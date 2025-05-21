@@ -30,7 +30,7 @@ class ScholarshipDetail(BaseModel):
         description="Full official name of the country where the scholarship is offered. Do NOT use abbreviations. For example: United Kingdom, not UK."
     )
     type: str = Field(
-        description="Indicates the funding structure of the scholarship. Valid options are: full ride, partial, merit-based, need-based, research-based, athletic"
+        description="Indicates the funding structure of the scholarship. Valid options are: Full ride, Partial, Merit-based, Need-based, Research-based, Athletic"
     )
     benefits: list[str] = Field(
         description="Specific advantages provided by the scholarship (e.g., tuition waiver, stipend, travel allowance)."
@@ -39,7 +39,7 @@ class ScholarshipDetail(BaseModel):
         description="Indicates whether the scholarship requires the student to relocate to the study location."
     ),
     study_format: str = Field(
-        description="The format of the study, valid formats are: in-person, pnline, hybrid"
+        description="The format of the study, valid formats are: in-person, online, hybrid"
     )
 
 

@@ -1,0 +1,64 @@
+{% extends 'base.html' %} {% block content %}
+<main class="container mx-auto px-16">
+  <section class="py-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+      {{ scholarship.title }}
+    </h2>
+    <p class="text-gray-600">
+      <span class="font-medium">Degree :</span>
+      {% for degree in scholarship.degree %} 
+      {{ degree }}{% if not forloop.last %}, {% endif %} 
+      {% endfor %}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Type :</span> 
+      {{ scholarship.type }}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Country :</span> 
+      {% for country in scholarship.country %}
+      {{ country }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Must relocate :</span>  
+      {{ scholarship.must_relocate }}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Study format :</span>  
+      {{ scholarship.study_format }}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Start Date : </span>
+      {{ scholarship.registration_start_date }}
+    </p>
+    <p class="text-gray-600">
+      <span class="font-medium">Start Date : </span> 
+      {{ scholarship.deadline }}
+    </p>
+    <p class="text-gray-600 font-medium">Description</p>
+    <p class="text-gray-600">{{ scholarship.description }}</p>
+    <p class="text-gray-600 font-medium">Benefits</p>
+    <ul class="list-disc list-inside text-gray-600">
+      {% for benefit in scholarship.benefits %}
+        <li>- {{ benefit }}</li>
+      {% endfor %}    
+    </ul>
+
+    <p class="text-gray-600 font-medium">Requirements</p>
+    <ul class="list-disc list-inside text-gray-600">
+      {% for requirement in scholarship.requirements %}
+        <li>- {{ requirement }}</li>
+      {% endfor %}    
+    </ul>
+    <a
+      href="{{ scholarship.official_url }}"
+      class="text-blue-600 underline"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Official Website
+    </a>
+  </section>
+</main>
+{% endblock %}
