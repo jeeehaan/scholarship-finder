@@ -60,8 +60,8 @@ async def scrape_and_insert_scholarships():
     )
     p = PromptManager()
 
-    max_limit = 7
-    n = 6
+    max_limit = 6
+    n = 1
     while True:
         if n == max_limit:
             break
