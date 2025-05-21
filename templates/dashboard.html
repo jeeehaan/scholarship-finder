@@ -31,7 +31,7 @@
     <section>
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
         <div class="grid grid-cols-3 gap-16">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4">
+            <!-- <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4">
                 <div class="badge badge-soft badge-accent">Fully Funded</div>
                 <p class="text-lg font-semibold text-gray-900 my-4">KAIST University Scholarship 2025</p>
                 <div class="space-y-2">
@@ -48,7 +48,10 @@
                     <p class="text-error font-medium text-sm">Due: 12 September 2024</p>
                     <button class="btn btn-primary">View Details</button>
                 </div>
-            </div>
+            </div> -->
+            {% for scholarship in scholarships %} 
+            {% include 'components/scholarship-card.html' with scholarship=scholarship %} 
+            {% endfor %}
         </div>
     </section>
 </main>

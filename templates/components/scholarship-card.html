@@ -1,0 +1,24 @@
+<div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4">
+  <div class="badge badge-soft badge-accent">Fully Funded</div>
+  <p class="text-lg font-semibold text-gray-900 my-4">
+    {{ scholarship.title }}
+  </p>
+  <div class="space-y-2">
+    <div>
+      <i class="fas fa-graduation-cap mr-2 text-gray-400 w-4"></i>
+      <span>{{ scholarship.degree }}</span>
+    </div>
+    <div class="flex items-center">
+      <i class="fas fa-map-marker-alt mr-2 text-gray-400 w-4"></i>
+      <span>{{ scholarship.country }}</span>
+    </div>
+  </div>
+  <div class="flex justify-between items-center mt-4">
+    <p class="text-error font-medium text-sm">
+      Due: {{ scholarship.deadline }}
+    </p>
+    <a href="{% url 'detail-view' scholarship.id %}" />
+      <button class="btn btn-primary">View Details</button>
+    </a>
+  </div>
+</div>
