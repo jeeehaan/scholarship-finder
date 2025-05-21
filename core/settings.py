@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     "apps.authentication",
     'django_json_widget',
     "apps.scholarships",
-    'django_json_widget',
     "huey.contrib.djhuey",
 ]
 
