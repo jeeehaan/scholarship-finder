@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "apps.authentication",
+    'django_json_widget',
     "apps.scholarships",
     'django_json_widget',
     "huey.contrib.djhuey",
