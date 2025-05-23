@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "apps.authentication",
-    'django_json_widget',
+    "django_json_widget",
     "apps.scholarships",
     "huey.contrib.djhuey",
 ]

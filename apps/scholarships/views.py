@@ -1,19 +1,24 @@
-from django.views.generic import TemplateView
+from django.views.generic import ListView, DetailView
 from django.http import JsonResponse
 from .tasks import scrape_scholarships
 from django.views import View
 from .models import ScholarshipRecommendation
 from .methods import query_search
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-# class ScholarshipListView(ListView):
-#     model = Scholarship
-#     context_object_name = "scholarships"
-#     ordering = ["-created_at"]
-#     template_name = "dashboard.html"
-
-
-class ScholarshipListView(TemplateView):
+class ScholarshipListView(LoginRequiredMixin, ListView):
+    model = Scholarship
+    context_object_name = "scholarships"
+    ordering = ["-created_at"]
     template_name = "dashboard.html"
+
+class ScholarshipDetailView(DetailView):
+    model = Scholarship
+    template_name = "scholarship-detail.html"
+    context_object_name = "scholarship"
+    slug_field = "id"
+    slug_url_kwarg = "id"
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
