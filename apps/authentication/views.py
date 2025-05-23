@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Profile
+from apps.scholarships.methods import generate_preference_query
 import json
 
 
@@ -21,7 +22,7 @@ class LoginView(View):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/")
+            return redirect("/dashboard")
 
         return redirect("login")
 
@@ -178,6 +179,15 @@ class OnboardingView(LoginRequiredMixin, TemplateView):
             profile.scholarship_types = data['scholarship_types']
         
         profile.save()
+        
+        generate_preference_query(
+            user,
+            profile.preferred_location,
+            profile.study_format,
+            profile.willing_to_relocate,
+            profile.scholarship_types,
+            profile.target_degree,
+        )
         
         messages.success(request, 'Profile updated successfully!')
         return JsonResponse({
