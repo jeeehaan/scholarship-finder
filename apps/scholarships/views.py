@@ -4,8 +4,9 @@ from .tasks import scrape_scholarships
 from django.views import View
 from .models import Scholarship
 from .methods import query_search
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class ScholarshipListView(ListView):
+class ScholarshipListView(LoginRequiredMixin, ListView):
     model = Scholarship
     context_object_name = "scholarships"
     ordering = ["-created_at"]
