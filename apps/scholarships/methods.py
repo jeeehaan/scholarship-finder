@@ -4,7 +4,7 @@ from core.ai.structured_output import ScholarshipDetail, ScholarshipList
 from core.ai.prompts import SYSTEM_PROMPT
 from core.ai.prompt_manager import PromptManager
 from crawl4ai.async_configs import CrawlerRunConfig, BrowserConfig, ProxyConfig
-from .models import Scholarship
+from .models import Scholarship, ScholarshipRecommendation
 from asgiref.sync import sync_to_async
 from dotenv import load_dotenv
 import os
@@ -76,9 +76,7 @@ async def scrape_and_insert_scholarships():
                 # Any exception inside the 'with attempt:' block will trigger a retry
                 retry_count = 0
                 async for attempt in AsyncRetrying(
-                        stop=stop_after_attempt(3),
-                        wait=wait_fixed(2),
-                        reraise=True
+                    stop=stop_after_attempt(3), wait=wait_fixed(2), reraise=True
                 ):
                     with attempt:
                         retry_count += 1
@@ -94,10 +92,16 @@ async def scrape_and_insert_scholarships():
                             )
                             # Explicitly raising an exception when markdown is empty to trigger retry
                             if not result.markdown:
-                                logger.warning(f"Got empty markdown for page {n}, will retry")
-                                raise ValueError(f"Failed to get markdown content for page {n}")
+                                logger.warning(
+                                    f"Got empty markdown for page {n}, will retry"
+                                )
+                                raise ValueError(
+                                    f"Failed to get markdown content for page {n}"
+                                )
             except RetryError:
-                logger.error(f"Failed to scrape page {n} after multiple retries, skipping")
+                logger.error(
+                    f"Failed to scrape page {n} after multiple retries, skipping"
+                )
                 n += 1
                 continue
 
@@ -129,24 +133,36 @@ async def scrape_and_insert_scholarships():
                         # Using the same strategy (3 attempts, 2-second wait) for consistency
                         retry_count = 0
                         async for attempt in AsyncRetrying(
-                                stop=stop_after_attempt(3),
-                                wait=wait_fixed(2),
-                                reraise=True
+                            stop=stop_after_attempt(3), wait=wait_fixed(2), reraise=True
                         ):
                             with attempt:
                                 retry_count += 1
                                 if retry_count == 1:
-                                    logger.info(f"Initial attempt to scrape scholarship {r.url}")
+                                    logger.info(
+                                        f"Initial attempt to scrape scholarship {r.url}"
+                                    )
                                 else:
-                                    logger.info(f"Retrying scholarship {r.url} - Attempt #{retry_count}")
+                                    logger.info(
+                                        f"Retrying scholarship {r.url} - Attempt #{retry_count}"
+                                    )
 
-                                async with AsyncWebCrawler(config=browser_config) as crawler:
-                                    scrape = await crawler.arun(r.url, config=run_config)
+                                async with AsyncWebCrawler(
+                                    config=browser_config
+                                ) as crawler:
+                                    scrape = await crawler.arun(
+                                        r.url, config=run_config
+                                    )
                                     if not scrape.markdown:
-                                        logger.warning(f"Got empty markdown for {r.url}, will retry")
-                                        raise ValueError(f"Failed to get markdown content for {r.url}")
+                                        logger.warning(
+                                            f"Got empty markdown for {r.url}, will retry"
+                                        )
+                                        raise ValueError(
+                                            f"Failed to get markdown content for {r.url}"
+                                        )
                     except RetryError:
-                        logger.error(f"Failed to scrape {r.url} after multiple retries, skipping")
+                        logger.error(
+                            f"Failed to scrape {r.url} after multiple retries, skipping"
+                        )
                         continue
 
                     messages = [
@@ -158,7 +174,9 @@ async def scrape_and_insert_scholarships():
                     logger.info(f"scholarship_data: {scholarship_data}")
 
                     if scholarship_data.title == "N/A":
-                        logger.info(f"Failed to extract scholarship data from {r.url}, skipping")
+                        logger.info(
+                            f"Failed to extract scholarship data from {r.url}, skipping"
+                        )
                         continue
 
                     cleaned_data = {
@@ -176,7 +194,7 @@ async def scrape_and_insert_scholarships():
                         "official_url": scholarship_data.url,
                         "source_url": r.url,
                         "must_relocate": scholarship_data.must_relocate,
-                        "study_format": scholarship_data.study_format
+                        "study_format": scholarship_data.study_format,
                     }
 
                     try:
@@ -287,3 +305,44 @@ def query_search(query):
         except Scholarship.DoesNotExist:
             continue
     return search_results
+
+
+def generate_preference_query(
+    user,
+    preferred_location,
+    study_format,
+    willing_to_relocate,
+    scholarship_type,
+    target_degree,
+):
+    query = f"""
+        Scholarship with this criteria:
+        location: {[country["name"] for country in preferred_location]}
+        study_format: {study_format}
+        willing_to_relocate: {willing_to_relocate}
+        scholarship_type: {scholarship_type}
+        target_degree: {target_degree}
+        """
+    try:
+        client = HttpClient(host="localhost", port=5010)
+        collection = client.get_collection(
+        name="scholarship_finder", embedding_function=openai_ef
+    )
+        results = collection.query(
+        query_texts=[query],
+        n_results=15,
+    )
+    except Exception as e:
+        logger.error(f"Failed to generate preference query: {e}")
+ 
+    
+    for metadata in results["metadatas"][0]:
+        try:
+            scholarship = Scholarship.objects.get(id=metadata["id"])
+            ScholarshipRecommendation.objects.create(
+            scholarship=scholarship, user=user
+        )
+        except Exception as e:
+            logger.error(f"Failed to save scholarship recommendation: {e}")
+            continue
+    
