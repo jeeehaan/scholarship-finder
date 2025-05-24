@@ -249,6 +249,30 @@ async def scrape_and_insert_scholarships():
             continue
 
 
+# def query_search(query):
+#     client = HttpClient(host="localhost", port=5010)
+#     collection = client.get_collection(
+#         name="scholarship_finder", embedding_function=openai_ef
+#     )
+#     results = collection.query(
+#         query_texts=[query],
+#         n_results=3,
+#     )
+#     search_results = []
+#     for metadata in results["metadatas"][0]:
+#         scholarship = Scholarship.objects.get(id=metadata["id"])
+#         search_results.append(
+#             {
+#                 "id": scholarship.id,
+#                 "title": scholarship.title,
+#                 "degree": scholarship.degree,
+#                 "deadline": scholarship.deadline,
+#                 "country": scholarship.country,
+#                 "type": scholarship.type,
+#             }
+#         )
+#     return search_results
+
 def query_search(query):
     client = HttpClient(host="localhost", port=5010)
     collection = client.get_collection(
@@ -256,21 +280,30 @@ def query_search(query):
     )
     results = collection.query(
         query_texts=[query],
-        n_results=10,
+        n_results=4,
     )
     search_results = []
     for metadata in results["metadatas"][0]:
-        scholarship = Scholarship.objects.get(id=metadata["id"])
-        search_results.append(
-            {
-                "id": scholarship.id,
-                "title": scholarship.title,
-                "degree": scholarship.degree,
-                "deadline": scholarship.deadline,
-                "country": scholarship.country,
-                "type": scholarship.type,
-            }
-        )
+        try:
+            scholarship = Scholarship.objects.get(id=metadata["id"])
+            search_results.append(
+                {
+                    "id": scholarship.id,
+                    "title": scholarship.title,
+                    "degree": scholarship.degree,
+                    "deadline": scholarship.deadline,
+                    "country": scholarship.country,
+                    "type": scholarship.type,
+                    "description": scholarship.description,
+                    "registration_start_date": scholarship.registration_start_date,
+                    "benefits": scholarship.benefits,
+                    "requirements": scholarship.requirements,
+                    "study_format": scholarship.study_format,
+                    "must_relocate": scholarship.must_relocate
+                }
+            )
+        except Scholarship.DoesNotExist:
+            continue
     return search_results
 
 
