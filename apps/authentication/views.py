@@ -192,5 +192,5 @@ class OnboardingView(LoginRequiredMixin, TemplateView):
         messages.success(request, 'Profile updated successfully!')
         return JsonResponse({
             'success': True,
-            'redirect_url': '/'  # or reverse('profile_success')
+            'redirect_url': '/dashboard'  # or reverse('profile_success')
         })
