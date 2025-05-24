@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="min-h-screen bg-base-200 p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-primary mb-2">Chat Assistance</h1>
+            <p class="text-base-content/70">Ask me about scholarships and get personalized recommendations</p>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body p-0">
+                <!-- Chat Messages -->
+                <div id="chats" class="p-6 h-96 overflow-y-auto space-y-4 bg-base-100 rounded-t-2xl">
+                    {% for chat in conversation %}
+                    <div class="chat {% if chat.role == 'user' %}chat-end{% else %}chat-start{% endif %}">
+                        <div class="chat-image avatar">
+                            <div class="w-10 rounded-full bg-{% if chat.role == 'user' %}primary{% else %}secondary{% endif %} flex items-center justify-center">
+                                {% if chat.role == 'user' %}
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="chat-header text-sm opacity-50 mb-1">
+                            {% if chat.role == 'user' %}You{% else %}Assistant{% endif %}
+                        </div>
+                        <div class="chat-bubble {% if chat.role == 'user' %}chat-bubble-primary{% else %}chat-bubble-secondary{% endif %}">
+                            {{ chat.message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-6 bg-base-200 rounded-b-2xl border-t border-base-300">
+                    <div class="flex gap-2">
+                        <input 
+                            id="chat-message-input" 
+                            type="text" 
+                            class="input input-bordered flex-1 input-primary focus:input-primary" 
+                            placeholder="Ask about scholarships..." 
+                            autofocus 
+                            autocomplete="off"
+                        />
+                        <button 
+                            id="chat-message-submit" 
+                            class="btn btn-primary px-6"
+                        >
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
+                            </svg>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scholarships Container -->
+        <div id="scholarships-container" class="mt-6 hidden">
+            <h2 class="text-2xl font-bold text-primary mb-4">Recommended Scholarships</h2>
+            <div id="scholarships-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Scholarship cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="hidden">
+            <div class="flex justify-center mt-4">
+                <span class="loading loading-dots loading-lg text-primary"></span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${ws_scheme}://${window.location.host}/ws/chat/`);
+    
+    const chatContainer = document.getElementById('chats');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const scholarshipsContainer = document.getElementById('scholarships-container');
+    const scholarshipsGrid = document.getElementById('scholarships-grid');
+
+    // Auto scroll to bottom of chat
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Create chat message element
+    function createChatMessage(message, isUser = false) {
+        const chatDiv = document.createElement('div');
+        chatDiv.className = `chat ${isUser ? 'chat-end' : 'chat-start'}`;
+        
+        chatDiv.innerHTML = `
+            <div class="chat-image avatar">
+                <div class="w-10 rounded-full bg-${isUser ? 'primary' : 'secondary'} flex items-center justify-center">
+                    ${isUser ? 
+                        '<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>' :
+                        '<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                    }
+                </div>
+            </div>
+            <div class="chat-header text-sm opacity-50 mb-1">
+                ${isUser ? 'You' : 'Assistant'}
+            </div>
+            <div class="chat-bubble ${isUser ? 'chat-bubble-primary' : 'chat-bubble-secondary'}">
+                ${marked.parse(message)}
+            </div>
+        `;
+        
+        return chatDiv;
+    }
+
+    // Create scholarship card
+    function createScholarshipCard(scholarship) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300';
+        
+        cardDiv.innerHTML = `
+            <div class="card-body">
+                <h2 class="card-title text-primary line-clamp-2">${scholarship.title}</h2>
+                <p class="text-base-content/70 line-clamp-3">${scholarship.description}</p>
+                <div class="card-actions justify-end mt-4">
+                    <a href="dashboard/${scholarship.id}/" class="btn btn-primary btn-sm">
+                        View Details
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        return cardDiv;
+    }
+
+    // Handle input enter key
+    document.getElementById('chat-message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('chat-message-submit').click();
+        }
+    });
+
+    document.getElementById('chat-message-submit').onclick = function (e) {
+        const inputDom = document.getElementById('chat-message-input');
+        const message = inputDom.value.trim();
+        if (message === '') return;
+
+        // Show user message
+        const userMessage = createChatMessage(message, true);
+        chatContainer.appendChild(userMessage);
+        scrollToBottom();
+
+        // Show loading
+        loadingIndicator.classList.remove('hidden');
+
+        // Send message
+        ws.send(JSON.stringify({
+            'message': message
+        }));
+        
+        inputDom.value = '';
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        // Hide loading
+        loadingIndicator.classList.add('hidden');
+        
+        // Show assistant message
+        if (data.message) {
+            const assistantMessage = createChatMessage(data.message, false);
+            chatContainer.appendChild(assistantMessage);
+            scrollToBottom();
+        }
+        
+        // Handle scholarships
+        if (data.scholarships && data.scholarships.length > 0) {
+            // Clear previous scholarships
+            scholarshipsGrid.innerHTML = '';
+            
+            // Create scholarship cards
+            data.scholarships.forEach(scholarship => {
+                const card = createScholarshipCard(scholarship);
+                scholarshipsGrid.appendChild(card);
+            });
+            
+            // Show scholarships container
+            scholarshipsContainer.classList.remove('hidden');
+            
+            // Smooth scroll to scholarships
+            setTimeout(() => {
+                scholarshipsContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 300);
+        }
+    };
+
+    ws.onopen = () => {
+        console.log("Connected to chat");
+        // Optional: Show connection indicator
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-top toast-end';
+        toast.innerHTML = '<div class="alert alert-success"><span>Connected to chat</span></div>';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    ws.onclose = () => {
+        console.log("Disconnected from chat");
+        // Optional: Show disconnection indicator
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-top toast-end';
+        toast.innerHTML = '<div class="alert alert-error"><span>Disconnected from chat</span></div>';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        loadingIndicator.classList.add('hidden');
+    };
+</script>
+
+<style>
+    /* Custom styles for better text clamping */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Smooth scrolling for chat container */
+    #chats {
+        scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar styling */
+    #chats::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #chats::-webkit-scrollbar-track {
+        background: hsl(var(--b2));
+    }
+    
+    #chats::-webkit-scrollbar-thumb {
+        background: hsl(var(--bc) / 0.2);
+        border-radius: 3px;
+    }
+    
+    #chats::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--bc) / 0.3);
+    }
+</style>
+{% endblock %}
