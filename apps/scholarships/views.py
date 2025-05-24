@@ -1,10 +1,11 @@
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import DetailView, TemplateView
 from django.http import JsonResponse
 from .tasks import scrape_scholarships
 from django.views import View
 from .models import ScholarshipRecommendation, Scholarship
 from .methods import query_search
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.chat.models import Conversation
 
 class ScholarshipListView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
@@ -29,6 +30,8 @@ class ScholarshipListView(LoginRequiredMixin, TemplateView):
                 }
             )
         context["scholarships"] = result
+        conversation = Conversation.objects.filter(user=user).order_by('created_at')
+        context['conversation'] = conversation
         return context
 
 
