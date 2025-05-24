@@ -5,7 +5,9 @@
 <nav class="container flex justify-between mx-auto p-4">
     <div class="text-primary text-xl font-bold">ScholarshipFinder</div>
     <div class="flex gap-12 items-center">
-        <input class="input input-primary" placeholder="Search scholarships...">
+        <form id="search-form" method="get" action="{% url 'search' %}">
+            <input name="q" id="search-input" class="input input-primary" placeholder="Search scholarships...">
+        </form>
         <div x-data="{ open: false }" class="relative">
             <!-- Avatar Button -->
             <button @click="open = !open" class="avatar avatar-placeholder focus:outline-none">
@@ -53,4 +55,12 @@
         </div>
     </section>
 </main>
+<script>
+    document.getElementById("search-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent default form submission if needed
+            document.getElementById("search-form").submit(); // Submit the form
+        }
+    });
+</script>
 {% endblock %}
