@@ -297,7 +297,7 @@ def generate_preference_query(
     )
         results = collection.query(
         query_texts=[query],
-        n_results=10,
+        n_results=15,
     )
     except Exception as e:
         logger.error(f"Failed to generate preference query: {e}")
