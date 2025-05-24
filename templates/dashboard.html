@@ -1,66 +1,31 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_layout.html' %}
 
-{% block content %}
-<!-- Navbar -->
-<nav class="container flex justify-between mx-auto p-4">
-    <div class="text-primary text-xl font-bold">ScholarshipFinder</div>
-    <div class="flex gap-12 items-center">
-        <form id="search-form" method="get" action="{% url 'search' %}">
-            <input name="q" id="search-input" class="input input-primary" placeholder="Search scholarships...">
-        </form>
-        <div x-data="{ open: false }" class="relative">
-            <!-- Avatar Button -->
-            <button @click="open = !open" class="avatar avatar-placeholder focus:outline-none">
-                <div class="bg-neutral text-neutral-content w-10 rounded-full flex items-center justify-center">
-                    <span class="text-sm">{{ user.first_name|first|upper}}</span>
-                </div>
-            </button>
-            
-            <!-- Dropdown Menu -->
-            <div x-show="open" 
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-75"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95"
-                 @click.outside="open = false"
-                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                <a href="{% url 'logout' %}" 
-                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                    Logout
-                </a>
-            </div>
-        </div>
-    </div>
-</nav>
-<!--   End Navbar-->
-
-<main class="container mx-auto px-16 py-8">
+{% block dashboard_content %}
+  <main class="container mx-auto px-16 py-8">
     <section class="py-8">
-        <p class="text-3xl font-bold text-gray-800">Welcome back, {{ user.first_name }} !</p>
-        <p class="text-gray-600">Here are scholarship that match your preference</p>
+      <p class="text-3xl font-bold text-gray-800">Welcome back, {{ user.first_name }} !</p>
+      <p class="text-gray-600">Here are scholarship that match your preference</p>
     </section>
 
     <section>
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
-        <div class="grid grid-cols-3 gap-16">
-            {% if scholarships %}
-                {% for scholarship in scholarships %}    
-                {% include 'components/scholarship-card.html' with scholarship=scholarship %} 
-                {% endfor %}
-            {% else %}
-                <p>No scholarships found.</p>
-            {% endif %}
-        </div>
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
+      <div class="grid grid-cols-3 gap-16">
+        {% if scholarships %}
+          {% for scholarship in scholarships %}
+            {% include 'components/scholarship-card.html' with scholarship=scholarship %}
+          {% endfor %}
+        {% else %}
+          <p>No scholarships found.</p>
+        {% endif %}
+      </div>
     </section>
-</main>
-<script>
-    document.getElementById("search-input").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault(); // Prevent default form submission if needed
-            document.getElementById("search-form").submit(); // Submit the form
-        }
-    });
-</script>
+  </main>
+  <script>
+    document.getElementById('search-input').addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault() // Prevent default form submission if needed
+        document.getElementById('search-form').submit() // Submit the form
+      }
+    })
+  </script>
 {% endblock %}
