@@ -7,6 +7,14 @@
       <p class="text-gray-600">Here are scholarship that match your preference</p>
     </section>
 
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg px-6 py-4 flex items-center space-x-3">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <span class="text-gray-700 font-medium">Searching scholarships...</span>
+      </div>
+    </div>
+
     <section>
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
       <div class="grid grid-cols-3 gap-16">
@@ -20,12 +28,47 @@
       </div>
     </section>
   </main>
+
   <script>
+    function showLoading() {
+      document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.add('hidden');
+    }
+
     document.getElementById('search-input').addEventListener('keypress', function (event) {
       if (event.key === 'Enter') {
-        event.preventDefault() // Prevent default form submission if needed
-        document.getElementById('search-form').submit() // Submit the form
+        event.preventDefault(); // Prevent default form submission if needed
+        
+        // Show loading state
+        showLoading();
+        
+        // Submit the form
+        document.getElementById('search-form').submit();
+        
+        // Note: Loading will be hidden when the page redirects to /search
+        // If you want to handle errors, you can add a timeout as fallback:
+        setTimeout(function() {
+          hideLoading();
+        }, 10000); // Hide loading after 10 seconds as fallback
       }
-    })
+    });
+
+    // Optional: Add loading state for form submission via button click
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+      showLoading();
+      
+      // Fallback timeout in case redirect doesn't happen
+      setTimeout(function() {
+        hideLoading();
+      }, 10000);
+    });
+
+    // Hide loading when page loads (in case user navigates back)
+    window.addEventListener('load', function() {
+      hideLoading();
+    });
   </script>
 {% endblock %}

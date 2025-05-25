@@ -259,7 +259,7 @@ def query_search(query):
     )
 
     scholarship_ids = []
-    min_relevance_score = 0.4  # Adjust this threshold as needed
+    min_relevance_score = 0.25  # Adjust this threshold as needed
     search_results = []
 
     if (

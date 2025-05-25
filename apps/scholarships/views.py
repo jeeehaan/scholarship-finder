@@ -1,12 +1,12 @@
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import DetailView, TemplateView
 from django.http import JsonResponse
 from .tasks import scrape_scholarships
 from django.views import View
 from .models import ScholarshipRecommendation, Scholarship
 from .methods import query_search
-from django.contrib.auth.mixins import LoginRequiredMixin
+from core.views import LoginRequiredViewMixin
 
-class ScholarshipListView(LoginRequiredMixin, TemplateView):
+class ScholarshipListView(LoginRequiredViewMixin, TemplateView):
     template_name = "dashboard.html"
     
     def get_context_data(self, **kwargs):
@@ -32,7 +32,7 @@ class ScholarshipListView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ScholarshipDetailView(DetailView):
+class ScholarshipDetailView(LoginRequiredViewMixin, DetailView):
     model = Scholarship
     template_name = "scholarship-detail.html"
     context_object_name = "scholarship"
@@ -53,7 +53,7 @@ class TestQueryView(View):
         results = query_search(query)
         return JsonResponse({"results": results})
 
-class ScholarshipSemanticSearchView(TemplateView):
+class ScholarshipSemanticSearchView(LoginRequiredViewMixin, TemplateView):
     template_name = "search.html"
 
     def get_context_data(self, **kwargs):
