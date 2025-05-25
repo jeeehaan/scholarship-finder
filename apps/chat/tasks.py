@@ -8,22 +8,6 @@ from core.ai.prompts import RAG_SYSTEM_PROMPT_SHORT, RAG_FALLBACK_SYSTEM_PROMPT
 
 
 
-SCHOLARSHIP_FUNCTION_DEFINITION = {
-    "type": "function",
-    "name": "get_scholarship_details",
-    "description": "Retrieve detailed information about a specific scholarship from the database",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "scholarship_id": {
-                "type": "string",
-                "description": "The ID of the scholarship to retrieve details for"
-            }
-        },
-        "required": ["scholarship_id"]
-    }
-}
-
 @task()
 def process_chat(message, user):
     # Save user message
@@ -93,7 +77,7 @@ def process_chat(message, user):
                     print(f"Metadata {i+1}: {metadata}")
                     
                     # Extract scholarship ID from metadata
-                    if metadata and 'id' in metadata:
+                    if metadata and 'id' in metadata and i == 0:
                         scholarship_ids.append(str(metadata['id']))
                         print(f"Found scholarship ID: {metadata['id']}")
                         

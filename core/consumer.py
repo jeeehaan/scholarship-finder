@@ -20,6 +20,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.user = self.scope["user"]
+        self.group_name = f"chat_{self.user.id}"
+
         await self.accept()
         await self.channel_layer.group_add("chat", self.channel_name)
        
