@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "apps.authentication",
-    'django_json_widget',
+    "django_json_widget",
     "apps.scholarships",
-    "huey.contrib.djhuey"
+    "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [
@@ -75,7 +75,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -96,6 +95,7 @@ DATABASES = {
         "PORT": os.environ.get("PG_PORT"),
     }
 }
+
 
 
 # Password validation
@@ -146,3 +146,13 @@ STORAGES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+            'prefix': 'scholarships:', 
+        },
+    }
+}

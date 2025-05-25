@@ -1,0 +1,33 @@
+{% extends 'dashboard_layout.html' %} <!-- or whatever your base template is -->
+
+{% block dashboard_content %}
+  <main class="container mx-auto px-16 py-8">
+    <section class="py-8">
+      <p class="text-3xl font-bold text-gray-800">Your Search Result</p>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Search Result</h2>
+      <form method="get" action="{% url 'search' %}" class="space-x-4">
+        <input class="input input-primary" type="text" name="q" placeholder="Search scholarships..." value="{{ query|default:'' }}" required />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+      <div class="mt-3">
+        {% if scholarships %}
+          <h2>Search results for "{{ query }}"</h2>
+          <div class="grid grid-cols-3 gap-16 mt-3">
+            {% for scholarship in scholarships %}
+              {% include 'components/scholarship-card.html' with scholarship=scholarship %}
+            {% endfor %}
+          </div>
+        {% else %}
+          {% if query %}
+            <p>No scholarships found for "{{ query }}"</p>
+          {% else %}
+            <p>Enter a query above to search scholarships.</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

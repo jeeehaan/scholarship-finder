@@ -1,0 +1,78 @@
+{% extends 'dashboard_layout.html' %}
+
+{% block dashboard_content %}
+  <main class="container mx-auto px-16">
+    <section class="py-8">
+      <h2 class="text-2xl font-semibold text-gray-800">{{ scholarship.title }}</h2>
+      <div class="my-4">
+        <p class="text-gray-700">
+          <span class="font-medium">Degree :</span>
+          {% for degree in scholarship.degree %}
+            {{ degree }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+        <p class="text-gray-700">
+          <span class="font-medium">Type :</span>
+          {{ scholarship.type }}
+        </p>
+        <p class="text-gray-700">
+          <span class="font-medium">Must relocate :</span>
+          {{ scholarship.must_relocate }}
+        </p>
+        <p class="text-gray-700">
+          <span class="font-medium">Study format :</span>
+          {{ scholarship.study_format }}
+        </p>
+        <p class="text-gray-700">
+          <span class="font-medium">Start Date :</span>
+          {{ scholarship.registration_start_date }}
+        </p>
+        <p class="text-gray-700">
+          <span class="font-medium">End Date :</span>
+          {{ scholarship.deadline }}
+        </p>
+      </div>
+      <a href="{{ scholarship.official_url }}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Visit Official Website</a>
+    </section>
+
+    <section class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center"><i class="fas fa-info-circle text-gray-500 mr-2"></i>Description</h3>
+      <p class="text-gray-700">{{ scholarship.description }}</p>
+    </section>
+
+    <section class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center"><i class="fas fa-gift text-green-500 mr-2"></i>Benefits</h3>
+      <ul class="list-disc list-inside">
+        {% for benefit in scholarship.benefits %}
+          <li class="flex items-start">
+            <i class="fas fa-check text-green-500 mt-1 mr-2"></i> <span class="text-gray-700">{{ benefit }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-clipboard-list text-blue-500 mr-2"></i>Requirements</h3>
+      <ul class="list-disc list-inside">
+        {% for requirement in scholarship.requirements %}
+          <li class="flex items-start">
+            <i class="fas fa-check text-blue-500 mt-1 mr-2"></i> <span class="text-gray-700">{{ requirement }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="mb-16">
+      <div>
+        <h3 class="font-medium mb-4"><i class="fas fa-globe-europe mr-3 text-gray-500"></i>Host Country</h3>
+        <div class="space-x-2">
+          {% for country in scholarship.country %}
+            <div class="badge badge-secondary badge-soft">
+              {{ country }}{% if not forloop.last %}, {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}
