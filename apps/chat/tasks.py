@@ -50,7 +50,7 @@ def process_chat(message, user):
         
         # Check if we got relevant results
         context_text = ""
-        min_relevance_score = 0.4 # Adjust this threshold as needed
+        min_relevance_score = 0.3 # Adjust this threshold as needed
         
         if (content and 
             'documents' in content and 
