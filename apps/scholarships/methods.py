@@ -248,62 +248,79 @@ async def scrape_and_insert_scholarships():
             n += 1
             continue
 
-
-# def query_search(query):
-#     client = HttpClient(host="localhost", port=5010)
-#     collection = client.get_collection(
-#         name="scholarship_finder", embedding_function=openai_ef
-#     )
-#     results = collection.query(
-#         query_texts=[query],
-#         n_results=3,
-#     )
-#     search_results = []
-#     for metadata in results["metadatas"][0]:
-#         scholarship = Scholarship.objects.get(id=metadata["id"])
-#         search_results.append(
-#             {
-#                 "id": scholarship.id,
-#                 "title": scholarship.title,
-#                 "degree": scholarship.degree,
-#                 "deadline": scholarship.deadline,
-#                 "country": scholarship.country,
-#                 "type": scholarship.type,
-#             }
-#         )
-#     return search_results
-
 def query_search(query):
     client = HttpClient(host="localhost", port=5010)
     collection = client.get_collection(
         name="scholarship_finder", embedding_function=openai_ef
     )
-    results = collection.query(
+    content = collection.query(
         query_texts=[query],
         n_results=4,
     )
+
+    scholarship_ids = []
+    min_relevance_score = 0.4  # Adjust this threshold as needed
     search_results = []
-    for metadata in results["metadatas"][0]:
-        try:
-            scholarship = Scholarship.objects.get(id=metadata["id"])
-            search_results.append(
-                {
-                    "id": scholarship.id,
-                    "title": scholarship.title,
-                    "degree": scholarship.degree,
-                    "deadline": scholarship.deadline,
-                    "country": scholarship.country,
-                    "type": scholarship.type,
-                    "description": scholarship.description,
-                    "registration_start_date": scholarship.registration_start_date,
-                    "benefits": scholarship.benefits,
-                    "requirements": scholarship.requirements,
-                    "study_format": scholarship.study_format,
-                    "must_relocate": scholarship.must_relocate
-                }
+
+    if (
+        content
+        and "documents" in content
+        and content["documents"]
+        and len(content["documents"][0]) > 0
+    ):
+
+        # Check if results are relevant enough
+        has_relevant_content = False
+
+        if "distances" in content and content["distances"]:
+            distances = content["distances"][0]
+            for i, distance in enumerate(distances):
+                similarity_score = 1 - (
+                    distance / 2
+                )  # Normalize assuming max distance is 2
+                if similarity_score >= min_relevance_score:
+                    has_relevant_content = True
+        else:
+            print("NO DISTANCE SCORES AVAILABLE")
+            has_relevant_content = True
+
+        if has_relevant_content:
+            # Combine the retrieved documents
+            documents = content["documents"][0]
+            metadatas = (
+                content.get("metadatas", [[]])[0] if content.get("metadatas") else []
             )
-        except Scholarship.DoesNotExist:
-            continue
+            for i, (doc, metadata) in enumerate(zip(documents, metadatas)):
+
+                # Extract scholarship ID from metadata
+                if metadata and "id" in metadata:
+                    scholarship_ids.append(str(metadata["id"]))
+    else:
+        print("NO DOCUMENTS FOUND OR EMPTY RESULTS")
+        return search_results
+    
+    if len(scholarship_ids) > 0:
+        for scholarship_id in scholarship_ids:
+            try:
+                scholarship = Scholarship.objects.get(id=scholarship_id)
+                search_results.append(
+                    {
+                        "id": scholarship.id,
+                        "title": scholarship.title,
+                        "degree": scholarship.degree,
+                        "deadline": scholarship.deadline,
+                        "country": scholarship.country,
+                        "type": scholarship.type,
+                        "description": scholarship.description,
+                        "registration_start_date": scholarship.registration_start_date,
+                        "benefits": scholarship.benefits,
+                        "requirements": scholarship.requirements,
+                        "study_format": scholarship.study_format,
+                        "must_relocate": scholarship.must_relocate,
+                    }
+                )
+            except Scholarship.DoesNotExist:
+                continue
     return search_results
 
 
@@ -326,23 +343,19 @@ def generate_preference_query(
     try:
         client = HttpClient(host="localhost", port=5010)
         collection = client.get_collection(
-        name="scholarship_finder", embedding_function=openai_ef
-    )
+            name="scholarship_finder", embedding_function=openai_ef
+        )
         results = collection.query(
-        query_texts=[query],
-        n_results=15,
-    )
+            query_texts=[query],
+            n_results=15,
+        )
     except Exception as e:
         logger.error(f"Failed to generate preference query: {e}")
- 
-    
+
     for metadata in results["metadatas"][0]:
         try:
             scholarship = Scholarship.objects.get(id=metadata["id"])
-            ScholarshipRecommendation.objects.create(
-            scholarship=scholarship, user=user
-        )
+            ScholarshipRecommendation.objects.create(scholarship=scholarship, user=user)
         except Exception as e:
             logger.error(f"Failed to save scholarship recommendation: {e}")
             continue
-    
