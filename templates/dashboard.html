@@ -1,39 +1,42 @@
 {% extends 'dashboard_layout.html' %}
 
 {% block dashboard_content %}
-  <main class="container mx-auto px-16 py-8">
-    <section class="py-8">
-      <p class="text-3xl font-bold text-gray-800">Welcome back, {{ user.first_name }} !</p>
-      <p class="text-gray-600">Here are scholarship that match your preference</p>
-    </section>
+  <div class="container mx-auto px-16 flex gap-2 h-screen">
+    <!-- Main Content (Left Side) -->
+    <main class="flex-1 px-8 py-8 overflow-y-auto">
+        <!-- Welcome Section -->
+        <section class="py-8">
+            <p class="text-3xl font-bold text-gray-800">Welcome back, {{ user.first_name }}!</p>
+            <p class="text-gray-600">Here are scholarships that match your preference</p>
+        </section>
 
-    <!-- Loading overlay -->
-    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg px-6 py-4 flex items-center space-x-3">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span class="text-gray-700 font-medium">Searching scholarships...</span>
-      </div>
-    </div>
-
-            <section>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
-                <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
-                    {% if scholarships %}
-                        {% for scholarship in scholarships %}    
-                        {% include 'components/scholarship-card.html' with scholarship=scholarship %} 
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-gray-500 col-span-full text-center py-8">No scholarships found.</p>
-                    {% endif %}
-                </div>
-            </section>
+        <!-- Search Loading overlay -->
+        <div id="search-loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg px-6 py-4 flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span class="text-gray-700 font-medium">Searching scholarships...</span>
+            </div>
         </div>
+
+        <!-- Scholarships Section -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recommended For You</h2>
+            <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                {% if scholarships %}
+                    {% for scholarship in scholarships %}    
+                    {% include 'components/scholarship-card.html' with scholarship=scholarship %} 
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-500 col-span-full text-center py-8">No scholarships found.</p>
+                {% endif %}
+            </div>
+        </section>
     </main>
 
     <!-- Chat Panel (Right Side) -->
-    <aside id="chat-panel" class="w-96 bg-base-200 border-l border-base-300 flex flex-col lg:flex">
+    <aside id="chat-panel" class="w-96 bg-base-200 border-l border-base-300 flex flex-col lg:flex h-full">
         <!-- Chat Header -->
-        <div class="p-4 bg-primary text-primary-content border-b border-base-300">
+        <div class="p-4 bg-primary text-primary-content border-b border-base-300 flex-shrink-0">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold flex items-center gap-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -51,7 +54,7 @@
         </div>
 
         <!-- Chat Messages -->
-        <div id="chats" class="flex-1 p-4 overflow-y-auto space-y-4 bg-base-100">
+        <div id="chats" class="flex-1 p-4 overflow-y-auto space-y-4 bg-base-100 min-h-0">
             {% for chat in conversation %}
             <div class="chat {% if chat.role == 'user' %}chat-end{% else %}chat-start{% endif %}">
                 <div class="chat-image avatar avatar-placeholder">
@@ -74,7 +77,7 @@
         </div>
 
         <!-- Loading Indicator -->
-        <div id="loading-indicator" class="px-4 py-2 hidden">
+        <div id="loading-indicator" class="px-4 py-2 hidden flex-shrink-0">
             <div class="flex items-center gap-2 text-sm text-base-content/60">
                 <span class="loading loading-dots loading-sm"></span>
                 Assistant is typing...
@@ -82,7 +85,7 @@
         </div>
 
         <!-- Chat Input -->
-        <div class="p-4 bg-base-200 border-t border-base-300">
+        <div class="p-4 bg-base-200 border-t border-base-300 flex-shrink-0">
             <div class="flex gap-2">
                 <input 
                     id="chat-message-input" 
@@ -129,7 +132,7 @@
             </div>
 
             <!-- Mobile chat messages mirror -->
-            <div id="chats-mobile" class="flex-1 p-4 overflow-y-auto space-y-4 bg-base-100">
+            <div id="chats-mobile" class="flex-1 p-4 overflow-y-auto space-y-4 bg-base-100 min-h-0">
                 <!-- Will be synced with desktop chat -->
             </div>
 
@@ -159,13 +162,30 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-    // Search functionality
-    document.getElementById("search-input").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("search-form").submit();
-        }
-    });
+    // Search functionality with loading indicator
+    const searchForm = document.getElementById("search-form");
+    const searchInput = document.getElementById("search-input");
+    const searchLoadingOverlay = document.getElementById("search-loading-overlay");
+
+    // Show loading when search form is submitted
+    if (searchForm) {
+        searchForm.addEventListener("submit", function(event) {
+            searchLoadingOverlay.classList.remove("hidden");
+        });
+    }
+
+    // Handle search input keypress
+    if (searchInput) {
+        searchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (searchForm) {
+                    searchLoadingOverlay.classList.remove("hidden");
+                    searchForm.submit();
+                }
+            }
+        });
+    }
 
     // Mobile chat toggle
     const chatToggle = document.getElementById('chat-toggle');
@@ -173,12 +193,14 @@
     const chatOverlayClose = document.getElementById('chat-overlay-close');
     const chatOverlayPanel = chatOverlay.querySelector('.fixed.right-0');
 
-    chatToggle.addEventListener('click', () => {
-        chatOverlay.classList.remove('hidden');
-        setTimeout(() => {
-            chatOverlayPanel.classList.remove('translate-x-full');
-        }, 10);
-    });
+    if (chatToggle) {
+        chatToggle.addEventListener('click', () => {
+            chatOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                chatOverlayPanel.classList.remove('translate-x-full');
+            }, 10);
+        });
+    }
 
     function closeMobileChat() {
         chatOverlayPanel.classList.add('translate-x-full');
@@ -187,12 +209,17 @@
         }, 300);
     }
 
-    chatOverlayClose.addEventListener('click', closeMobileChat);
-    chatOverlay.addEventListener('click', (e) => {
-        if (e.target === chatOverlay) {
-            closeMobileChat();
-        }
-    });
+    if (chatOverlayClose) {
+        chatOverlayClose.addEventListener('click', closeMobileChat);
+    }
+    
+    if (chatOverlay) {
+        chatOverlay.addEventListener('click', (e) => {
+            if (e.target === chatOverlay) {
+                closeMobileChat();
+            }
+        });
+    }
 
     // WebSocket Chat Functionality
     const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
@@ -204,12 +231,16 @@
 
     // Sync mobile and desktop chat
     function syncChatContainers() {
-        chatContainerMobile.innerHTML = chatContainer.innerHTML;
+        if (chatContainerMobile && chatContainer) {
+            chatContainerMobile.innerHTML = chatContainer.innerHTML;
+        }
     }
 
     // Auto scroll to bottom
     function scrollToBottom(container = chatContainer) {
-        container.scrollTop = container.scrollHeight;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     // Create chat message
@@ -218,7 +249,7 @@
         chatDiv.className = `chat ${isUser ? 'chat-end' : 'chat-start'}`;
         
         // Get user's first initial from the page (from Django template)
-        const userInitial = document.querySelector('nav .avatar span')?.textContent || 'U';
+        const userInitial = document.querySelector('nav .avatar span')?.textContent || '{{ user.first_name|first|upper }}';
         
         chatDiv.innerHTML = `
             <div class="chat-image avatar avatar-placeholder">
@@ -257,7 +288,7 @@
     // Handle chat input
     function handleChatSubmit(inputElement) {
         const message = inputElement.value.trim();
-        if (message === '') return;
+        if (message === '' || !chatContainer) return;
 
         // Show user message
         const userMessage = createChatMessage(message, true);
@@ -267,7 +298,9 @@
         scrollToBottom(chatContainerMobile);
 
         // Show loading
-        loadingIndicator.classList.remove('hidden');
+        if (loadingIndicator) {
+            loadingIndicator.classList.remove('hidden');
+        }
 
         // Send message
         ws.send(JSON.stringify({
@@ -281,39 +314,49 @@
     const chatInput = document.getElementById('chat-message-input');
     const chatSubmit = document.getElementById('chat-message-submit');
 
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleChatSubmit(chatInput);
-        }
-    });
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleChatSubmit(chatInput);
+            }
+        });
+    }
 
-    chatSubmit.addEventListener('click', () => {
-        handleChatSubmit(chatInput);
-    });
+    if (chatSubmit) {
+        chatSubmit.addEventListener('click', () => {
+            handleChatSubmit(chatInput);
+        });
+    }
 
     // Mobile chat input events
     const chatInputMobile = document.getElementById('chat-message-input-mobile');
     const chatSubmitMobile = document.getElementById('chat-message-submit-mobile');
 
-    chatInputMobile.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleChatSubmit(chatInputMobile);
-        }
-    });
+    if (chatInputMobile) {
+        chatInputMobile.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleChatSubmit(chatInputMobile);
+            }
+        });
+    }
 
-    chatSubmitMobile.addEventListener('click', () => {
-        handleChatSubmit(chatInputMobile);
-    });
+    if (chatSubmitMobile) {
+        chatSubmitMobile.addEventListener('click', () => {
+            handleChatSubmit(chatInputMobile);
+        });
+    }
 
     // WebSocket event handlers
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
         // Hide loading
-        loadingIndicator.classList.add('hidden');
+        if (loadingIndicator) {
+            loadingIndicator.classList.add('hidden');
+        }
         
         // Show assistant message
-        if (data.message) {
+        if (data.message && chatContainer) {
             const assistantMessage = createChatMessage(data.message, false);
             chatContainer.appendChild(assistantMessage);
             
@@ -346,7 +389,9 @@
 
     ws.onerror = (error) => {
         console.error("WebSocket error:", error);
-        loadingIndicator.classList.add('hidden');
+        if (loadingIndicator) {
+            loadingIndicator.classList.add('hidden');
+        }
     };
 </script>
 
@@ -366,9 +411,22 @@
         overflow: hidden;
     }
     
-    /* Smooth scrolling */
+    /* Enhanced scrolling for chat containers */
     #chats, #chats-mobile {
         scroll-behavior: smooth;
+        max-height: 100%;
+    }
+    
+    /* Ensure proper flex behavior for scrolling */
+    #chat-panel {
+        min-height: 0;
+        max-height: 100vh;
+    }
+    
+    /* Force scrollable area */
+    #chats {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--bc) / 0.2) hsl(var(--b2));
     }
     
     /* Custom scrollbar */
@@ -390,6 +448,17 @@
         .container {
             padding-left: 1rem;
             padding-right: 1rem;
+        }
+    }
+
+    /* Mobile chat animation adjustment for right side */
+    @media (max-width: 1024px) {
+        #chat-overlay .fixed.right-0 {
+            transform: translateX(100%);
+        }
+        
+        #chat-overlay .fixed.right-0:not(.translate-x-full) {
+            transform: translateX(0);
         }
     }
 </style>
